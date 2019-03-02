@@ -17,7 +17,13 @@ using int32 = int;
 
 std::vector<FString> words;
 bool bGameWon = false;
+bool bNewWord = false;
 int difficultyLength = 4;
+
+enum EgameMode {
+	single,
+	multi
+};
 
 void createNewWordFromDictionary(int &difficultyLength);
 int randomNumber(int const &size);
@@ -27,20 +33,27 @@ FText GetValidGuess();
 void PlayGame();
 bool AskToPlayAgain();
 void restart(bool);
-
+void askGameMode();
+EgameMode gameMode;
 FBullCowGame BCGame;
 
 
 int main() {
 	
 	bool bPlay = false;
-	restart(false);
-	do {
-		PrintIntro();
-		PlayGame();
-		bPlay = AskToPlayAgain();
-	} while (bPlay);
+	askGameMode();
 
+	if (gameMode == 0) {
+		do {
+			PrintIntro();
+			PlayGame();
+			bPlay = AskToPlayAgain();
+		} while (bPlay);
+	}
+	if (gameMode == 1) {
+		std::cout << "Sorry, not yet implemented!\n";
+		system("pause");
+	}
 	return 0;
 }
 
@@ -62,6 +75,18 @@ void PlayGame()
 		PrintOutro();
 	}
 
+}
+
+void askGameMode() {
+	std::cout << "Do you want to play singleplayer (I determine the word to guess) or multiplayer (a second person enters a word)? (s/m)" << std::endl;
+	FText Response = "";
+	std::getline(std::cin, Response);
+	if (Response[0] == 's' || Response[0] == 'S') {
+		gameMode = single;
+	}
+	else if (Response[0] == 'm' || Response[0] == 'M') {
+		gameMode = multi;
+	}
 }
 
 //loop until user gives valid guess
@@ -101,9 +126,11 @@ FText GetValidGuess(){
 
 void PrintIntro(){
 	//introduce the game
+
+	restart(bNewWord);
+	std::cout << " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ \n";
 	std::cout << "\n\n Welcome to Bulls and Cows, a fun word game!" << std::endl;
-	std::cout << "Can you guess the " << difficultyLength
-		<< " letter isogram I'm thinking of? " << std::endl; 
+	std::cout << " Can you guess the isogram I'm thinking of? " << std::endl; 
 	std::cout << std::endl;
 	std::cout << std::endl;
 	std::cout << std::endl;
@@ -122,6 +149,7 @@ void PrintIntro(){
 	std::cout << std::endl;
 	std::cout << std::endl;
 	std::cout << std::endl;
+	std::cout << " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ \n";
 }
 
 void PrintOutro() {
@@ -132,15 +160,17 @@ void PrintOutro() {
 		std::cout << "Please come back another time.";
 	}
 	else {
-		std::cout << "!! GAME OVER !!\n";
-		std::cout << "Better luck next time!\n oOOo";
+		std::cout << " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ \n";
+		std::cout << " !! GAME OVER !! \n";
+		std::cout << " Better luck next time!\n oOOo \n";
+		std::cout << " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ \n";
 		bGameWon = false;
 	}
 }
 
 bool AskToPlayAgain() {
 	if (bGameWon == false) {
-		std::cout << "Do you want to know the solution? (y/n)" << std::endl;
+		std::cout << " Do you want to know the solution? (y/n)" << std::endl;
 		FText Response = "";
 		std::getline(std::cin, Response);
 		if (Response[0] == 'y' || Response[0] == 'Y') {
@@ -149,7 +179,7 @@ bool AskToPlayAgain() {
 			FText Response = "";
 			std::getline(std::cin, Response);
 			if (Response[0] == 'y' || Response[0] == 'Y') {
-				restart(false);
+				bNewWord = false;
 			}
 			return (Response[0] == 'y' || Response[0] == 'Y');
 		}
@@ -158,7 +188,7 @@ bool AskToPlayAgain() {
 			FText Response = "";
 			std::getline(std::cin, Response);
 			if (Response[0] == 'y' || Response[0] == 'Y') {
-				restart(true);
+				bNewWord = true;
 			}
 			return (Response[0] == 'y' || Response[0] == 'Y');
 		}
@@ -168,7 +198,7 @@ bool AskToPlayAgain() {
 		FText Response = "";
 		std::getline(std::cin, Response);
 		if (Response[0] == 'y' || Response[0] == 'Y') {
-			restart(false);
+			bNewWord = false;
 		}
 		return (Response[0] == 'y' || Response[0] == 'Y');
 	}
@@ -177,10 +207,14 @@ bool AskToPlayAgain() {
 
 void restart(bool bKeepWord) {
 	if (bKeepWord != true) {
-		std::cout << "\n\ How many letters should the word have? (range 2-15)\n";
+		std::cout << "\n How many letters should the word have? (range 2-15)\n";
 		FText Response = "";
 		std::getline(std::cin, Response);
 		difficultyLength = std::stoi(Response);
+		if (difficultyLength < 2 || difficultyLength > 15) {
+			std::cout << "This is not a valid length!";
+			restart(false);
+		}
 		createNewWordFromDictionary(difficultyLength);
 	}
 	BCGame.Reset();

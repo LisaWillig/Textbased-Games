@@ -35,6 +35,7 @@ void FBullCowGame::Reset()
 
 int32 FBullCowGame::GetMaxTries() const {
 	TMap<int32, int32> WorldLengthToMaxtries{ 
+		{2, 4},
 		{3, 6}, 
 	    {4, 9},
 	    {5, 14},
