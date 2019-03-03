@@ -31,6 +31,7 @@ void PrintIntro();
 void PrintOutro();
 FText GetValidGuess();
 void PlayGame();
+void createNewWordFromUserInput();
 bool AskToPlayAgain();
 void restart(bool);
 void askGameMode();
@@ -43,17 +44,13 @@ int main() {
 	bool bPlay = false;
 	askGameMode();
 
-	if (gameMode == 0) {
-		do {
-			PrintIntro();
-			PlayGame();
-			bPlay = AskToPlayAgain();
-		} while (bPlay);
-	}
-	if (gameMode == 1) {
-		std::cout << "Sorry, not yet implemented!\n";
-		system("pause");
-	}
+	do {
+		PrintIntro();
+		PlayGame();
+		bPlay = AskToPlayAgain();
+	} while (bPlay);
+
+	system("pause");
 	return 0;
 }
 
@@ -62,7 +59,6 @@ void PlayGame()
 {
 	int32 MaxTries = BCGame.GetMaxTries();
 	FBullCowCount BullCowCount;
-
 
 	while (!BCGame.GameWon(BullCowCount) && BCGame.GetCurrentTry() <= MaxTries) {
 		FText Guess = GetValidGuess();
@@ -206,7 +202,7 @@ bool AskToPlayAgain() {
 }
 
 void restart(bool bKeepWord) {
-	if (bKeepWord != true) {
+	if (bKeepWord != true && gameMode == 0) {
 		std::cout << "\n How many letters should the word have? (range 2-15)\n";
 		FText Response = "";
 		std::getline(std::cin, Response);
@@ -216,6 +212,9 @@ void restart(bool bKeepWord) {
 			restart(false);
 		}
 		createNewWordFromDictionary(difficultyLength);
+	}
+	else {
+		createNewWordFromUserInput();
 	}
 	BCGame.Reset();
 }
@@ -241,4 +240,16 @@ void createNewWordFromDictionary(int &difficultyLength) {
 	}
 	int rand = randomNumber(words.size());
 	BCGame.SetHiddenWord(words[rand]);
+}
+
+void createNewWordFromUserInput() {
+	std::cout << "Enter a valid isogram: ";
+	FText Response = "";
+	std::getline(std::cin, Response);
+	while (BCGame.IsIsogram(Response) == false) {
+		createNewWordFromUserInput();
+	}
+
+	difficultyLength = Response.size();
+	BCGame.SetHiddenWord(Response);
 }
