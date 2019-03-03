@@ -120,11 +120,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="FBullCowGame.cpp" />
+    <ClCompile Include="highScoreFile.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="readInput.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FBullCowGame.h" />
+    <ClInclude Include="highscoreFile.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="readInput.h" />
   </ItemGroup>

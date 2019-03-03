@@ -1,0 +1,2 @@
+#Playername	 Number of letteres	 Score(Number of tries)
+Test	 3	 20

@@ -8,6 +8,7 @@ user interaction. For game logic see the FBUllCowGame class*/
 #include "FBullCowGame.h"
 #include <map>
 #include "readInput.h"
+#include "highscoreFile.h"
 #include <random>
 
 //to make syntax unreal friendly
@@ -19,7 +20,7 @@ std::vector<FString> words;
 bool bGameWon = false;
 bool bNewWord = false;
 int difficultyLength = 4;
-
+int score = 0; 
 enum EgameMode {
 	single,
 	multi
@@ -31,6 +32,7 @@ void PrintIntro();
 void PrintOutro();
 FText GetValidGuess();
 void PlayGame();
+void createNewWordFromUserInput();
 bool AskToPlayAgain();
 void restart(bool);
 void askGameMode();
@@ -41,19 +43,17 @@ FBullCowGame BCGame;
 int main() {
 	
 	bool bPlay = false;
+	std::vector<std::string> test;
+	readScore(3);
 	askGameMode();
 
-	if (gameMode == 0) {
-		do {
-			PrintIntro();
-			PlayGame();
-			bPlay = AskToPlayAgain();
-		} while (bPlay);
-	}
-	if (gameMode == 1) {
-		std::cout << "Sorry, not yet implemented!\n";
-		system("pause");
-	}
+	do {
+		PrintIntro();
+		PlayGame();
+		bPlay = AskToPlayAgain();
+	} while (bPlay);
+
+	system("pause");
 	return 0;
 }
 
@@ -63,18 +63,17 @@ void PlayGame()
 	int32 MaxTries = BCGame.GetMaxTries();
 	FBullCowCount BullCowCount;
 
-
 	while (!BCGame.GameWon(BullCowCount) && BCGame.GetCurrentTry() <= MaxTries) {
 		FText Guess = GetValidGuess();
 		BullCowCount = BCGame.SubmitValidGuess(Guess);
 		std::cout << "Bulls =  " << BullCowCount.Bulls;
 		std::cout << "& Cows: " << BullCowCount.Cows << "\n\n";
 		std::cout << "Try:  " << BCGame.GetCurrentTry() << " of " << MaxTries << std::endl;
+		score++;
 	}
 	if (BCGame.GameWon(BullCowCount) || BCGame.GetCurrentTry() >= MaxTries) {
 		PrintOutro();
 	}
-
 }
 
 void askGameMode() {
@@ -96,7 +95,6 @@ FText GetValidGuess(){
 	FText Guess = "";
 	
 	do {
-
 		int32 CurrentTry = BCGame.GetCurrentTry();
 		std::cout << "Please enter a valid guess: "; 
 		std::getline(std::cin, Guess);
@@ -118,7 +116,6 @@ FText GetValidGuess(){
 		default:
 			continue; 
 		}
-
 	} while (Status != EGuessStatus::OK);
 	return Guess;
 }
@@ -158,11 +155,13 @@ void PrintOutro() {
 		std::cout << "Well done! You have won! \n";
 		std::cout << "Thank you for playing :)\n";
 		std::cout << "Please come back another time.";
+		std::cout << " Your score is: " << score << std::endl;
 	}
 	else {
 		std::cout << " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ \n";
 		std::cout << " !! GAME OVER !! \n";
 		std::cout << " Better luck next time!\n oOOo \n";
+		std::cout << " Your score is: " << score << std::endl; 
 		std::cout << " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ \n";
 		bGameWon = false;
 	}
@@ -179,6 +178,7 @@ bool AskToPlayAgain() {
 			FText Response = "";
 			std::getline(std::cin, Response);
 			if (Response[0] == 'y' || Response[0] == 'Y') {
+				score = 0;
 				bNewWord = false;
 			}
 			return (Response[0] == 'y' || Response[0] == 'Y');
@@ -206,7 +206,7 @@ bool AskToPlayAgain() {
 }
 
 void restart(bool bKeepWord) {
-	if (bKeepWord != true) {
+	if (bKeepWord != true && gameMode == 0) {
 		std::cout << "\n How many letters should the word have? (range 2-15)\n";
 		FText Response = "";
 		std::getline(std::cin, Response);
@@ -217,6 +217,9 @@ void restart(bool bKeepWord) {
 		}
 		createNewWordFromDictionary(difficultyLength);
 	}
+	else if(gameMode == 1){
+	createNewWordFromUserInput();
+		}
 	BCGame.Reset();
 }
 
@@ -241,4 +244,16 @@ void createNewWordFromDictionary(int &difficultyLength) {
 	}
 	int rand = randomNumber(words.size());
 	BCGame.SetHiddenWord(words[rand]);
+}
+
+void createNewWordFromUserInput() {
+	std::cout << "Enter a valid isogram: ";
+	FText Response = "";
+	std::getline(std::cin, Response);
+	while (BCGame.IsIsogram(Response) == false) {
+		createNewWordFromUserInput();
+	}
+
+	difficultyLength = Response.size();
+	BCGame.SetHiddenWord(Response);
 }
